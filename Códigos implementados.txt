@@ -1,0 +1,284 @@
+Función verificación:
+void verificacion(){
+  // Enciende todos los LEDs
+  for (int i = 0; i < 8; i++){
+  digitalWrite(latchPin, LOW);  // Prepara para la actualización
+  shiftOut(dataPin, clockPin, MSBFIRST, B11111111);  // Envía 8 bits "1" a todos los registros
+  digitalWrite(latchPin, HIGH);  // Actualiza la salida
+  }
+  // Espera 1 segundo
+  delay(1000);
+  
+  // Apaga todos los LEDs
+  for (int i = 0; i < 8; i++){
+  digitalWrite(latchPin, LOW);  // Prepara para la actualización
+  shiftOut(dataPin, clockPin, MSBFIRST, B00000000);  // Envía 8 bits "0" a todos los registros
+  digitalWrite(latchPin, HIGH);  // Actualiza la salida
+
+    // Espera 1 segundo
+  }
+  delay(1000);
+
+}
+
+---
+
+Funcion imagen:
+void escribirPatron() {
+  for (int row = 0; row < 8; row++) {
+    Serial.print("Fila ");
+    Serial.print(row);
+    Serial.println(":");
+
+    while (Serial.available() < 8) {
+      // Espera hasta que se ingrese el patrón completo de la fila
+    }
+
+    String input = Serial.readString();
+
+    // Verifica si la longitud de la entrada es válida
+    if (input.length() == 8) {
+      // Lee el patrón ingresado por el usuario y actualiza el estado de la fila
+      for (int i = 0; i < 8; i++) {
+        if (input.charAt(i) == '1') {
+          bitSet(ledStates[row], i);
+        } else {
+          bitClear(ledStates[row], i);
+        }
+      }
+    } else {
+      Serial.println("La longitud del patron debe ser igual a 8 (una fila).");
+    }
+  }
+
+  // Actualiza el estado de los LEDs después de ingresar todos los patrones de fila
+  actualizarLeds();
+  Serial.println("Patron actualizado.");
+}
+
+void actualizarLeds() {
+  for (int i = 8 - 1; i >= 0; i--) {
+    digitalWrite(latchPin, LOW);
+    shiftOut(dataPin, clockPin, MSBFIRST, ledStates[i]);
+    digitalWrite(latchPin, HIGH);
+  }
+}
+
+---
+
+Funcion patrones:
+// Define una secuencia de bits para los patrones
+byte patron1[] = {
+  B00011000,
+  B00111100,
+  B01111110,
+  B11111111,
+  B11111111,
+  B01111110,
+  B00111100,
+  B00011000,
+
+};
+byte patron2[] = {
+  B10000001,
+  B01000010,
+  B00100100,
+  B00011000,
+  B00011000,
+  B00100100,
+  B01000010,
+  B10000001,
+};
+byte patron3[] = {
+  B10110110,
+  B10110110,
+  B11011011,
+  B11011011,
+  B10110110,
+  B10110110,
+  B11011011,
+  B11011011,
+};
+byte patron4[] = {
+  B00001111,
+  B00011110,
+  B00111100,
+  B01111000,
+  B01111000,
+  B00111100,
+  B00011110,
+  B00001111,
+};
+void mostrarPatron(byte patron[]) {
+  digitalWrite(latchPin, LOW);
+  for (int i = 0; i < 8; i++){
+    shiftOut(dataPin, clockPin, MSBFIRST, patron[i]);
+  }
+  digitalWrite(latchPin, HIGH);
+}
+
+---
+
+Funcion publik:
+void setup() {
+  pinMode(dataPin, OUTPUT);
+  pinMode(clockPin, OUTPUT);
+  pinMode(latchPin, OUTPUT);
+  Serial.begin(9600);
+  Serial.println("Bienvenido a la funcion publik.");
+  Serial.println("Selecciona una opcion:");
+  Serial.println("a. Verificar funcionamiento de LEDs.");
+  Serial.println("b. Mostrar imagen de prueba.");
+  Serial.println("c. Mostrar patrones alternativos.");
+}
+
+void loop() {
+  if (Serial.available() > 0) {
+    char option = Serial.read();
+    
+    switch (option) {
+      case 'a':
+        verificarFuncionamientoLEDs();
+        break;
+      case 'b':
+        mostrarImagenPrueba();
+        break;
+      case 'c':
+        mostrarPatronesAlternativos();
+        break;
+      default:
+        Serial.println("Opción no válida. Selecciona 'a', 'b' o 'c'.");
+        break;
+    }
+  }
+}
+
+void verificarFuncionamientoLEDs() {
+  Serial.println("Verificando funcionamiento de LEDs.");
+  int delayTime;
+  int numSequences;
+
+  Serial.println("Ingresa el tiempo entre encendido y apagado (en milisegundos):");
+  while (!Serial.available()) {}
+  delayTime = Serial.parseInt();
+
+  Serial.println("Ingresa el numero de secuencias:");
+  while (!Serial.available()) {}
+  numSequences = Serial.parseInt();
+  
+  for (int seq = 0; seq < numSequences; seq++) {
+  	for (int i = 0; i < 8; i++){
+  	digitalWrite(latchPin, LOW);  // Prepara para la actualización
+  	shiftOut(dataPin, clockPin, MSBFIRST, B11111111);  // Envía 8 bits "1" a todos los registros
+  	digitalWrite(latchPin, HIGH);  // Actualiza la salida
+  	}
+  	delay(delayTime);
+  
+    for (int i = 0; i < 8; i++){
+    digitalWrite(latchPin, LOW);  // Prepara para la actualización
+    shiftOut(dataPin, clockPin, MSBFIRST, B00000000);  // Envía 8 bits "0" a todos los registros
+    digitalWrite(latchPin, HIGH);  // Actualiza la salida
+
+    }
+    delay(delayTime);
+  }
+   
+}
+void mostrarImagenPrueba() {
+  for (int row = 0; row < 8; row++) {
+    Serial.print("Fila ");
+    Serial.print(row);
+    Serial.println(":");
+
+    while (Serial.available() < 8) {
+      // Espera hasta que se ingrese el patrón completo de la fila
+    }
+
+    String input = Serial.readString();
+
+    // Verifica si la longitud de la entrada es válida
+    if (input.length() == 8) {
+      // Lee el patrón ingresado por el usuario y actualiza el estado de la fila
+      for (int i = 0; i < 8; i++) {
+        if (input.charAt(i) == '1') {
+          bitSet(ledStates[row], i);
+        } else {
+          bitClear(ledStates[row], i);
+        }
+      }
+    } else {
+      Serial.println("La longitud del patron debe ser igual a 8 (una fila).");
+    }
+  }
+
+  // Actualiza el estado de los LEDs después de ingresar todos los patrones de fila
+  actualizarLeds();
+  Serial.println("Patron actualizado.");
+}
+
+void actualizarLeds() {
+  for (int i = 8 - 1; i >= 0; i--) {
+    digitalWrite(latchPin, LOW);
+    shiftOut(dataPin, clockPin, MSBFIRST, ledStates[i]);
+    digitalWrite(latchPin, HIGH);
+  }
+}
+
+void mostrarPatronesAlternativos() {
+  Serial.println("Mostrando patrones alternativos.");
+  int delayTime;
+  
+  Serial.println("Ingresa el tiempo entre visualizaciones (en milisegundos):");
+  while (!Serial.available()) {}
+  delayTime = Serial.parseInt();
+
+  // Define los patrones alternativos
+  byte patterns[4][8] = {
+  B00011000,
+  B00111100,
+  B01111110,
+  B11111111,
+  B11111111,
+  B01111110,
+  B00111100,
+  B00011000,
+
+  B10000001,
+  B01000010,
+  B00100100,
+  B00011000,
+  B00011000,
+  B00100100,
+  B01000010,
+  B10000001,
+
+  B10110110,
+  B10110110,
+  B11011011,
+  B11011011,
+  B10110110,
+  B10110110,
+  B11011011,
+  B11011011,
+
+  B00001111,
+  B00011110,
+  B00111100,
+  B01111000,
+  B01111000,
+  B00111100,
+  B00011110,
+  B00001111,
+  };
+
+  // Mostrar los patrones alternativos en bucle
+  while (true) {
+    for (int pat = 0; pat < 4; pat++) {
+      for (int i = 0; i < numChips; i++) {
+        ledStates[i] = patterns[pat][i];
+      }
+      actualizarLeds();
+      delay(delayTime);
+    }
+  }
+}
